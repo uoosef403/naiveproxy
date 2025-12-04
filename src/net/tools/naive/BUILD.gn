@@ -1,0 +1,9 @@
+shared_library("naive") {
+  sources = [ "naive_async_lib.cc" ]
+  defines = [ "NAIVE_IMPLEMENTATION" ]
+  deps = [
+    "//base",
+    "//net",
+    "//url",
+  ]
+}

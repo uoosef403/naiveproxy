@@ -1861,25 +1861,6 @@ void SpdySession::EnqueueResetStreamFrame(spdy::SpdyStreamId stream_id,
   DCHECK(buffered_spdy_framer_.get());
   std::unique_ptr<spdy::SpdySerializedFrame> rst_frame(
       buffered_spdy_framer_->CreateRstStream(stream_id, error_code));
-  // Can't send padding if the send window is very tight.
-  if (session_send_window_size_ >= 72) {
-    constexpr int kNonPaddingSize =
-        spdy::kDataFrameMinimumSize + spdy::kRstStreamFrameSize;
-    uint8_t padding_length = base::RandInt(48, 72) - kNonPaddingSize;
-    size_t expected_length = kNonPaddingSize + padding_length;
-    spdy::SpdyFrameBuilder builder(expected_length);
-    builder.BeginNewFrame(spdy::SpdyFrameType::DATA,
-                          spdy::DATA_FLAG_FIN | spdy::DATA_FLAG_PADDED,
-                          stream_id, padding_length);
-    builder.WriteUInt8(padding_length - 1);
-    std::string padding(padding_length - 1, 0);
-    builder.WriteBytes(padding.data(), padding.size());
-    builder.BeginNewFrame(spdy::SpdyFrameType::RST_STREAM, 0, stream_id, 4);
-    builder.WriteUInt32(error_code);
-    DCHECK_EQ(expected_length, builder.length());
-    rst_frame = std::make_unique<spdy::SpdySerializedFrame>(builder.take());
-    DecreaseSendWindowSize(padding_length);
-  }
 
   EnqueueSessionWrite(priority, spdy::SpdyFrameType::RST_STREAM,
                       std::move(rst_frame));
@@ -2811,7 +2792,7 @@ void SpdySession::OnRstStream(spdy::SpdyStreamId stream_id,
   auto it = active_streams_.find(stream_id);
   if (it == active_streams_.end()) {
     // NOTE:  it may just be that the stream was cancelled.
-    VLOG(1) << "Received RST for invalid stream" << stream_id;
+    LOG(WARNING) << "Received RST for invalid stream" << stream_id;
     return;
   }
 
@@ -3045,7 +3026,7 @@ void SpdySession::OnWindowUpdate(spdy::SpdyStreamId stream_id,
 
     if (it == active_streams_.end()) {
       // NOTE:  it may just be that the stream was cancelled.
-      VLOG(1) << "Received WINDOW_UPDATE for invalid stream " << stream_id;
+      LOG(WARNING) << "Received WINDOW_UPDATE for invalid stream " << stream_id;
       return;
     }
 
@@ -3090,7 +3071,7 @@ void SpdySession::OnHeaders(spdy::SpdyStreamId stream_id,
   auto it = active_streams_.find(stream_id);
   if (it == active_streams_.end()) {
     // NOTE:  it may just be that the stream was cancelled.
-    VLOG(1) << "Received HEADERS for invalid stream " << stream_id;
+    LOG(WARNING) << "Received HEADERS for invalid stream " << stream_id;
     return;
   }
 

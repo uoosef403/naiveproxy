@@ -211,7 +211,7 @@ bool ProxyChain::IsValidInternal() const {
         return false;
       }
       seen_quic = true;
-    } else if (proxy_server.is_https() || proxy_server.is_http()) {
+    } else if (proxy_server.is_https()) {
       seen_https = true;
     } else {
       return false;

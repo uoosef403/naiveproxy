@@ -32,7 +32,7 @@ class NET_EXPORT ScopedResState {
   virtual const struct __res_state& state() const;
 
  private:
-#if !BUILDFLAG(IS_OPENBSD) && !BUILDFLAG(IS_FUCHSIA) && !defined(__MUSL__)
+#if !BUILDFLAG(IS_OPENBSD) && !BUILDFLAG(IS_FUCHSIA)
   struct __res_state res_;
 #endif  // !BUILDFLAG(IS_OPENBSD) && !BUILDFLAG(IS_FUCHSIA)
 

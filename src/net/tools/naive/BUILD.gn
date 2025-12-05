@@ -1,9 +1,16 @@
-shared_library("naive") {
-  sources = [ "naive_async_lib.cc" ]
+shared_library("naive_lib") {
+  sources = [
+    "naive_async_lib.cc",
+    "naive_async_lib.h",
+  ]
+
+  # Defines NAIVE_IMPLEMENTATION so the DLL export macro works correctly inside the library
   defines = [ "NAIVE_IMPLEMENTATION" ]
+
   deps = [
     "//base",
     "//net",
     "//url",
+    "//net:test_support", # Required for TRAFFIC_ANNOTATION_FOR_TESTS
   ]
 }

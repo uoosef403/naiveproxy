@@ -113,6 +113,6 @@ mkdir -p out
 
 export DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
-./gn/out/gn gen "$out" --args="$flags $EXTRA_FLAGS"
+gn gen "$out" --args="$flags $EXTRA_FLAGS"
 
 ninja -C "$out" naive
